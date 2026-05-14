@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="welcome-pipe">
+    <div class="pipe-top"></div>
+    <div class="pipe-body">
+        <p class="welcome-sub">ЗАПУСКАЕМ КЛАССИКУ ПРЯМО В БРАУЗЕРЕ</p>
+    </div>
+</div>
+
+<!-- Блок выбора игр -->
+<section class="games-section">
+    <h2 class="section-title">
+        <span class="title-block">⟹ ВЫБЕРИ ИГРУ ⟸</span>
+    </h2>
+    <div class="games-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin: 30px 0;">
+        <!-- Pacman -->
+        <div class="game-card">
+            <div class="game-preview pacman-bg"></div>
+            <h3>PACMAN</h3>
+            <a href="/game/pacman" class="pixel-button" style="margin-top: 15px;">ИГРАТЬ</a>
+        </div>
+
+        <!-- Snake -->
+        <div class="game-card">
+            <div class="game-preview snake-bg"></div>
+            <h3>SNAKE</h3>
+            <a href="/game/snake" class="pixel-button" style="margin-top: 15px;">ИГРАТЬ</a>
+        </div>
+
+        <!-- Minesweeper -->
+        <div class="game-card">
+            <div class="game-preview minesweeper-bg"></div>
+            <h3>MINESWEEPER</h3>
+            <a href="/game/minesweeper" class="pixel-button" style="margin-top: 15px;">ИГРАТЬ</a>
+        </div>
+
+        <!-- Flappy Bird -->
+        <div class="game-card">
+            <div class="game-preview flappy-bg"></div>
+            <h3>FLAPPY BIRD</h3>
+            <a href="/game/flappy" class="pixel-button" style="margin-top: 15px;">ИГРАТЬ</a>
+        </div>
+
+        <!-- 2048 -->
+        <div class="game-card">
+            <div class="game-preview game2048-bg"></div>
+            <h3>2048</h3>
+            <a href="/game/2048" class="pixel-button" style="margin-top: 15px;">ИГРАТЬ</a>
+        </div>
+
+        <!-- Tetris -->
+        <div class="game-card">
+            <div class="game-preview tetris-bg"></div>
+            <h3>TETRIS</h3>
+            <a href="/game/tetris" class="pixel-button" style="margin-top: 15px;">ИГРАТЬ</a>
+        </div>
+
+        <!-- Space Invaders -->
+        <div class="game-card">
+            <div class="game-preview space-invaders-bg"></div>
+            <h3>SPACE INVADERS</h3>
+            <a href="/game/space_invaders" class="pixel-button" style="margin-top: 15px;">ИГРАТЬ</a>
+        </div>
+
+        <!-- Шашки -->
+        <div class="game-card">
+            <div class="game-preview checkers-bg"></div>
+            <h3>CHECKERS</h3>
+            <a href="/game/checkers" class="pixel-button" style="margin-top: 15px;">ИГРАТЬ</a>
+        </div>
+
+        <!-- Шахматы -->
+        <div class="game-card">
+            <div class="game-preview chess-bg"></div>
+            <h3>CHESS</h3>
+            <a href="/game/chess" class="pixel-button" style="margin-top: 15px;">ИГРАТЬ</a>
+        </div>
+    </div>
+</section>
+
+<!-- Секция таблицы рекордов (динамическая) -->
+<section class="records-section">
+    <h2 class="section-title">
+        <span class="title-block">⟹ ТАБЛИЦА РЕКОРДОВ ⟸</span>
+    </h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        <!-- Pacman рекорды -->
+        <div class="records-table" style="padding: 10px;">
+            <h3 style="text-align: center; margin-bottom: 15px;">🎮 PACMAN</h3>
+            <div class="record-row header-row">
+                <span>ИГРОК</span>
+                <span>ОЧКИ</span>
+            </div>
+            {% for score in pacman_scores %}
+            <div class="record-row">
+                <span>{{ score.nickname }}</span>
+                <span>{{ score.score }}</span>
+            </div>
+            {% else %}
+            <div class="record-row">
+                <span colspan="2" style="text-align: center;">Нет рекордов</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Snake рекорды -->
+        <div class="records-table" style="padding: 10px;">
+            <h3 style="text-align: center; margin-bottom: 15px;">🐍 SNAKE</h3>
+            <div class="record-row header-row">
+                <span>ИГРОК</span>
+                <span>ОЧКИ</span>
+            </div>
+            {% for score in snake_scores %}
+            <div class="record-row">
+                <span>{{ score.nickname }}</span>
+                <span>{{ score.score }}</span>
+            </div>
+            {% else %}
+            <div class="record-row">
+                <span colspan="2" style="text-align: center;">Нет рекордов</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Minesweeper рекорды -->
+        <div class="records-table" style="padding: 10px;">
+            <h3 style="text-align: center; margin-bottom: 15px;">💣 MINESWEEPER</h3>
+            <div class="record-row header-row">
+                <span>ИГРОК</span>
+                <span>ОЧКИ</span>
+            </div>
+            {% for score in minesweeper_scores %}
+            <div class="record-row">
+                <span>{{ score.nickname }}</span>
+                <span>{{ score.score }}</span>
+            </div>
+            {% else %}
+            <div class="record-row">
+                <span colspan="2" style="text-align: center;">Нет рекордов</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Ссылка на бот поддержки -->
+<div class="support-block" style="text-align: center; margin: 40px 0;">
+    <a href="https://vondic.knopusmedia.ru/feed/messages?bot_id=ec77f86b-1c57-400d-a5e8-948be0a6f22f"
+       class="pixel-button"
+       target="_blank"
+       style="font-size: 18px; padding: 15px 30px;">
+        💬 НАПИСАТЬ В ПОДДЕРЖКУ
+    </a>
+    <p class="support-note" style="margin-top: 15px;">
+        Откроется чат с ботом — отправьте туда ваш вопрос.
+    </p>
+</div>
+{% endblock %}

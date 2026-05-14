@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+<style>
+    .lobby-container {
+        background: #f0e68c;
+        border: 8px solid #b45f2e;
+        border-radius: 30px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 15px 0 #8b5a2b;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .lobby-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin: 30px 0;
+        flex-wrap: wrap;
+    }
+    
+    .lobby-id {
+        background: #2c1810;
+        color: #ffcc00;
+        padding: 15px 30px;
+        border-radius: 20px;
+        font-size: 24px;
+        font-family: 'Press Start 2P', cursive;
+        margin: 20px 0;
+        word-break: break-all;
+    }
+    
+    .game-board-container {
+        margin: 20px auto;
+        overflow-x: auto;
+    }
+    
+    .player-info {
+        display: flex;
+        justify-content: space-between;
+        margin: 20px 0;
+        padding: 15px;
+        background: rgba(0,0,0,0.1);
+        border-radius: 15px;
+        gap: 10px;
+    }
+    
+    .player {
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 12px;
+        flex: 1;
+    }
+    
+    .player.active {
+        background: #ffcc00;
+        color: #2c1810;
+        box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+    }
+    
+    .waiting-message {
+        font-size: 14px;
+        color: #d82e2e;
+        animation: blink 1s infinite;
+    }
+    
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    .input-lobby {
+        background: #2c1810;
+        color: #ffcc00;
+        border: 4px solid #b45f2e;
+        padding: 15px;
+        border-radius: 15px;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 14px;
+        text-align: center;
+        width: 200px;
+    }
+    
+    .input-lobby:focus {
+        outline: none;
+        border-color: #ffcc00;
+    }
+    
+    .game-status {
+        margin: 15px 0;
+        font-size: 14px;
+        color: #2c1810;
+        background: rgba(0,0,0,0.1);
+        padding: 10px;
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="lobby-section" class="lobby-container">
+    <h2>{{ game_name }}</h2>
+    
+    <div id="lobby-menu">
+        <div class="lobby-buttons">
+            <button class="pixel-button" onclick="createLobby()" style="font-size: 14px; padding: 20px;">
+                🎮 СОЗДАТЬ ЛОББИ
+            </button>
+            <button class="pixel-button" onclick="showJoinForm()" style="font-size: 14px; padding: 20px;">
+                🔗 ПОДКЛЮЧИТЬСЯ
+            </button>
+        </div>
+        
+        <div id="join-form" style="display: none; margin-top: 20px;">
+            <input type="text" id="lobby-id-input" class="input-lobby" placeholder="ID ЛОББИ" maxlength="8" style="text-transform: uppercase;">
+            <br>
+            <button class="pixel-button" onclick="joinLobby()" style="margin-top: 10px;">ПОДКЛЮЧИТЬСЯ</button>
+            <button class="pixel-button" onclick="hideJoinForm()" style="margin-top: 10px; background: #d82e2e;">ОТМЕНА</button>
+        </div>
+    </div>
+    
+    <div id="lobby-info" style="display: none;">
+        <div class="lobby-id" id="lobby-id-display"></div>
+        <p class="waiting-message" id="waiting-message">ОЖИДАНИЕ ИГРОКА...</p>
+        
+        <div id="game-section" style="display: none;">
+            <div class="player-info">
+                <div class="player" id="player-white">⚪ БЕЛЫЕ</div>
+                <div class="player" id="player-black">⚫ ЧЁРНЫЕ</div>
+            </div>
+            
+            <div id="game-board" class="game-board-container"></div>
+            <div class="game-status" id="game-status"></div>
+            
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button class="pixel-button" onclick="leaveGame()">
+                    ← ВЫЙТИ ИЗ ИГРЫ
+                </button>
+                <a href="/" class="pixel-button">🏠 НА ГЛАВНУЮ</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.GAME_TYPE = '{{ game_type }}';
+    let currentLobbyId = null;
+    let checkInterval = null;
+    let gameUpdateInterval = null;
+    let selectedCell = null;
+    let playerColor = null;
+    let currentTurn = 'white';
+    
+    function createLobby() {
+        fetch(`/api/game/${GAME_TYPE}/lobby`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'create'})
+        })
+        .then(response => response.json())
+        .then(data => {
+            currentLobbyId = data.lobby_id;
+            document.getElementById('lobby-menu').style.display = 'none';
+            document.getElementById('lobby-info').style.display = 'block';
+            document.getElementById('lobby-id-display').textContent = 'ID: ' + currentLobbyId;
+            
+            // Начинаем проверять подключение игрока
+            startCheckingLobby();
+        })
+        .catch(error => console.error('Create lobby error:', error));
+    }
+    
+    function showJoinForm() {
+        document.getElementById('join-form').style.display = 'block';
+    }
+    
+    function hideJoinForm() {
+        document.getElementById('join-form').style.display = 'none';
+        document.getElementById('lobby-id-input').value = '';
+    }
+    
+    function joinLobby() {
+        const lobbyId = document.getElementById('lobby-id-input').value.toUpperCase();
+        
+        if (!lobbyId) {
+            alert('Введите ID лобби');
+            return;
+        }
+        
+        fetch(`/api/game/${GAME_TYPE}/lobby`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'join', lobby_id: lobbyId})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                currentLobbyId = lobbyId;
+                document.getElementById('lobby-menu').style.display = 'none';
+                document.getElementById('lobby-info').style.display = 'block';
+                document.getElementById('lobby-id-display').textContent = 'ID: ' + currentLobbyId;
+                document.getElementById('waiting-message').style.display = 'none';
+                document.getElementById('game-section').style.display = 'block';
+                
+                startGameLoop();
+            } else {
+                alert(data.error || 'Ошибка подключения');
+            }
+        })
+        .catch(error => console.error('Join lobby error:', error));
+    }
+    
+    function startCheckingLobby() {
+        checkInterval = setInterval(() => {
+            fetch(`/api/game/${GAME_TYPE}/lobby/${currentLobbyId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.lobby && data.lobby.is_full) {
+                        clearInterval(checkInterval);
+                        document.getElementById('waiting-message').style.display = 'none';
+                        document.getElementById('game-section').style.display = 'block';
+                        startGameLoop();
+                    }
+                })
+                .catch(error => console.error('Check lobby error:', error));
+        }, 2000);
+    }
+    
+    function startGameLoop() {
+        updateGameState();
+        // Обновляем состояние каждые 2 секунды
+        gameUpdateInterval = setInterval(updateGameState, 2000);
+    }
+    
+    function updateGameState() {
+        fetch(`/api/game/${GAME_TYPE}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'get_state'})
+        })
+        .then(response => response.json())
+        .then(data => {
+            const board = document.getElementById('game-board');
+            if (board && data.map_html) {
+                board.innerHTML = data.map_html;
+            }
+            
+            // Обновляем информацию о ходе
+            if (data.current_turn) {
+                currentTurn = data.current_turn;
+                playerColor = data.player_color;
+                updateTurnDisplay();
+            }
+            
+            // Обновляем имена игроков
+            if (data.host_nickname) {
+                document.getElementById('player-white').textContent = '⚪ ' + data.host_nickname;
+            }
+            if (data.guest_nickname) {
+                document.getElementById('player-black').textContent = '⚫ ' + data.guest_nickname;
+            }
+            
+            // Сбрасываем выбор при смене хода
+            if (currentTurn !== playerColor) {
+                selectedCell = null;
+            }
+            
+            if (data.game_over) {
+                if (gameUpdateInterval) clearInterval(gameUpdateInterval);
+                setTimeout(() => {
+                    if (data.won) alert('🏆 ПОБЕДА!');
+                    else alert('💀 ПОРАЖЕНИЕ');
+                }, 100);
+            }
+            
+            // Добавляем обработчики кликов
+            attachCellHandlers();
+        })
+        .catch(error => console.error('Update state error:', error));
+    }
+    
+    function updateTurnDisplay() {
+        const whiteEl = document.getElementById('player-white');
+        const blackEl = document.getElementById('player-black');
+        const statusEl = document.getElementById('game-status');
+        
+        whiteEl.classList.remove('active');
+        blackEl.classList.remove('active');
+        
+        if (currentTurn === 'white') {
+            whiteEl.classList.add('active');
+            if (playerColor === 'white') {
+                statusEl.textContent = 'ВАШ ХОД';
+            } else {
+                statusEl.textContent = 'ОЖИДАНИЕ ХОДА';
+            }
+        } else {
+            blackEl.classList.add('active');
+            if (playerColor === 'black') {
+                statusEl.textContent = 'ВАШ ХОД';
+            } else {
+                statusEl.textContent = 'ОЖИДАНИЕ ХОДА';
+            }
+        }
+    }
+    
+    function attachCellHandlers() {
+        const cells = document.querySelectorAll('.checkers-cell, .chess-cell');
+        cells.forEach(cell => {
+            cell.onclick = function() {
+                // Проверяем, наш ли ход
+                if (currentTurn !== playerColor) {
+                    document.getElementById('game-status').textContent = 'СЕЙЧАС НЕ ВАШ ХОД!';
+                    return;
+                }
+                
+                const row = parseInt(this.dataset.row);
+                const col = parseInt(this.dataset.col);
+                
+                console.log('Cell clicked:', row, col, 'selected:', selectedCell);
+                
+                if (selectedCell && (selectedCell.row !== row || selectedCell.col !== col)) {
+                    // Делаем ход
+                    makeMove(selectedCell.row, selectedCell.col, row, col);
+                    selectedCell = null;
+                } else {
+                    // Выбираем фигуру
+                    selectedCell = {row: row, col: col};
+                    console.log('Selected:', selectedCell);
+                }
+            };
+        });
+    }
+    
+    function makeMove(fromRow, fromCol, toRow, toCol) {
+        document.getElementById('game-status').textContent = 'ХОД ВЫПОЛНЯЕТСЯ...';
+        
+        fetch(`/api/game/${GAME_TYPE}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                action: 'make_move',
+                from: [fromRow, fromCol],
+                to: [toRow, toCol]
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.map_html) {
+                document.getElementById('game-board').innerHTML = data.map_html;
+            }
+            
+            if (data.success) {
+                document.getElementById('game-status').textContent = 'ХОД ВЫПОЛНЕН';
+                // Обновляем состояние сразу после хода
+                if (data.current_turn) {
+                    currentTurn = data.current_turn;
+                    updateTurnDisplay();
+                }
+                attachCellHandlers();
+            } else {
+                document.getElementById('game-status').textContent = data.message || 'ОШИБКА ХОДА';
+                attachCellHandlers();
+            }
+        })
+        .catch(error => {
+            console.error('Move error:', error);
+            document.getElementById('game-status').textContent = 'ОШИБКА СВЯЗИ';
+        });
+    }
+    
+    function leaveGame() {
+        if (checkInterval) clearInterval(checkInterval);
+        if (gameUpdateInterval) clearInterval(gameUpdateInterval);
+        currentLobbyId = null;
+        selectedCell = null;
+        location.reload();
+    }
+    
+    // Очищаем интервалы при уходе со страницы
+    window.addEventListener('beforeunload', function() {
+        if (checkInterval) clearInterval(checkInterval);
+        if (gameUpdateInterval) clearInterval(gameUpdateInterval);
+    });
+</script>
+{% endblock %}

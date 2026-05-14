@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+<style>
+    .game-container {
+        background: #0a0a2a;
+    }
+    .game-container h2 {
+        color: #00ffff;
+        text-shadow: 0 0 10px #00ffff;
+    }
+    .controls-tetris {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin: 20px 0;
+    }
+    .control-btn-tetris {
+        background: #1a1a3a;
+        color: #00ffff;
+        border: 3px solid #ffcc00;
+        border-radius: 10px;
+        padding: 10px 15px;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 11px;
+        cursor: pointer;
+        transition: 0.1s ease;
+    }
+    .control-btn-tetris:hover {
+        background: #ffcc00;
+        color: #1a1a3a;
+        transform: scale(0.95);
+    }
+    .tetris-tip {
+        background: rgba(0,0,0,0.7);
+        color: #00ffff;
+        padding: 10px;
+        border-radius: 10px;
+        margin-top: 15px;
+        font-size: 10px;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="game-container">
+    <h2>🧱 TETRIS</h2>
+    <div id="game-board" style="min-height: 400px;"></div>
+    <div class="score">СЧЁТ: <span id="score">0</span></div>
+    
+    <div class="controls-tetris">
+        <button class="control-btn-tetris" data-direction="up">↻ ПОВОРОТ</button>
+        <button class="control-btn-tetris" data-direction="left">◄ ВЛЕВО</button>
+        <button class="control-btn-tetris" data-direction="down">▼ ВНИЗ</button>
+        <button class="control-btn-tetris" data-direction="right">► ВПРАВО</button>
+        <button class="control-btn-tetris" data-direction="space" id="hardDropBtn">💥 БЫСТРО</button>
+        <button class="control-btn-tetris" onclick="resetGame()">🔄 НОВАЯ ИГРА</button>
+    </div>
+    
+    <div class="tetris-tip">
+        💡 УПРАВЛЕНИЕ: Стрелки — движение, ↑ — поворот, ПРОБЕЛ — быстрое падение!<br>
+        🎯 Заполняй линии и зарабатывай очки. Чем выше уровень — тем быстрее падают фигуры!
+    </div>
+    
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="/" class="pixel-button">← НА ГЛАВНУЮ</a>
+    </div>
+</div>
+
+<script>
+    window.GAME_TYPE = 'tetris';
+    
+    // Обработка кнопки быстрого падения
+    document.getElementById('hardDropBtn')?.addEventListener('click', function() {
+        fetch(`/api/game/tetris`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'move', direction: 'space'})
+        })
+        .then(response => response.json())
+        .then(data => {
+            updateGameUI(data);
+        })
+        .catch(error => console.error('Hard drop error:', error));
+    });
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/game.js') }}"></script>
+{% endblock %}

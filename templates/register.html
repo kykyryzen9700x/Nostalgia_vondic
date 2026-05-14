@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="register-box" style="max-width: 500px; margin: 50px auto;">
+    <h2 style="text-align: center; margin-bottom: 30px;">РЕГИСТРАЦИЯ</h2>
+    
+    {% if error %}
+        <div style="background: #d82e2e; color: white; padding: 10px; border-radius: 15px; margin-bottom: 20px; text-align: center;">
+            {{ error }}
+        </div>
+    {% endif %}
+    
+    <form method="post">
+        <div class="form-group">
+            <label>EMAIL:</label>
+            <input type="email" name="email" class="pixel-input" required>
+        </div>
+        <div class="form-group">
+            <label>ПАРОЛЬ:</label>
+            <input type="password" name="password" class="pixel-input" required>
+        </div>
+        <button type="submit" class="pixel-button big-button">ЗАРЕГИСТРИРОВАТЬСЯ</button>
+    </form>
+    <p class="form-note" style="text-align: center; margin-top: 20px;">
+        Уже есть аккаунт? <a href="/login" style="color: #d82e2e;">ВОЙТИ</a>
+    </p>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+<style>
+    .game-container-2048 {
+        background: #f0e68c;
+        border: 8px solid #b45f2e;
+        border-radius: 30px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 15px 0 #8b5a2b;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    .controls-2048 {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        margin: 20px 0;
+    }
+    .control-btn-2048 {
+        background: #8B4513;
+        color: #f0e68c;
+        border: 3px solid #ffcc00;
+        border-radius: 12px;
+        padding: 10px 18px;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 11px;
+        cursor: pointer;
+        transition: 0.1s ease;
+    }
+    .control-btn-2048:hover {
+        background: #ffcc00;
+        color: #8B4513;
+        transform: scale(0.95);
+    }
+    .score-2048 {
+        font-size: 28px;
+        margin: 15px 0;
+        color: #776E65;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="game-container-2048">
+    <h2>🎮 2048</h2>
+    <div id="game-board" style="min-height: 400px;"></div>
+    <div class="score-2048">СЧЁТ: <span id="score">0</span></div>
+    
+    <div class="controls-2048">
+        <button class="control-btn-2048" data-direction="up">▲ ВВЕРХ</button>
+        <button class="control-btn-2048" data-direction="left">◄ ВЛЕВО</button>
+        <button class="control-btn-2048" data-direction="down">▼ ВНИЗ</button>
+        <button class="control-btn-2048" data-direction="right">► ВПРАВО</button>
+        <button class="control-btn-2048" onclick="resetGame()">🔄 НОВАЯ ИГРА</button>
+    </div>
+    
+    <div style="margin-top: 20px;">
+        <a href="/" class="pixel-button">← НА ГЛАВНУЮ</a>
+    </div>
+</div>
+
+<script>
+    window.GAME_TYPE = '2048';
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/game.js') }}"></script>
+{% endblock %}

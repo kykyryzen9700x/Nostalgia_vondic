@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+<style>
+    .game-container {
+        background: linear-gradient(180deg, #87CEEB 0%, #87CEEB 70%, #8B4513 100%);
+    }
+    .control-btn {
+        background: #4a4a4a;
+        border-color: #ffcc00;
+    }
+    .flappy-tip {
+        background: rgba(0,0,0,0.7);
+        color: #ffcc00;
+        padding: 10px;
+        border-radius: 15px;
+        margin-top: 15px;
+        font-size: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="game-container">
+    <h2>🐦 FLAPPY BIRD</h2>
+    <div id="game-board" style="min-height: 400px;"></div>
+    <div class="score">СЧЁТ: <span id="score">0</span></div>
+    
+    <div class="controls">
+        <button class="control-btn" data-direction="up">🐦 ПРЫГНУТЬ</button>
+        <button class="control-btn" onclick="resetGame()">🔄 НОВАЯ ИГРА</button>
+    </div>
+    
+    <div class="flappy-tip">
+        💡 Нажимай ПРОБЕЛ или СТРЕЛКУ ВВЕРХ, чтобы птичка летела!<br>
+        🟩 Пролетай между трубами и набирай очки!
+    </div>
+    
+    <div style="margin-top: 20px;">
+        <a href="/" class="pixel-button">← НА ГЛАВНУЮ</a>
+    </div>
+</div>
+
+<script>
+    window.GAME_TYPE = 'flappy';
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/game.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>NOSTALGIA</title>
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', filename='css/style.css') }}"
+		/>
+
+		<link
+			href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+			rel="stylesheet"
+		/>
+
+		{% block extra_css %}{% endblock %}
+
+		<style>
+			/* Фиксация подвала внизу страницы */
+			html,
+			body {
+				height: 100%;
+				margin: 0;
+				padding: 0;
+			}
+
+			body {
+				display: flex;
+				flex-direction: column;
+				min-height: 100vh;
+			}
+
+			.container {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				max-width: 1200px;
+				margin: 0 auto;
+				position: relative;
+				z-index: 10;
+			}
+
+			.content-wrapper {
+				flex: 1;
+			}
+
+			.pixel-footer {
+				margin-top: 50px;
+				background: #2c1810;
+				border: 6px solid #b45f2e;
+				border-radius: 30px 30px 0 0;
+				padding: 30px;
+				color: #f0e68c;
+				flex-shrink: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<header class="mario-header">
+				<div class="logo">
+					<h1>NOSTALGIA</h1>
+					<div class="coin-counter"><span class="coin">🪙</span> x 1985</div>
+				</div>
+				<nav class="pixel-nav">
+					<a href="/" class="pixel-button">ГЛАВНАЯ</a>
+					{% if session.user_id %}
+					<a href="/profile" class="pixel-button">ПРОФИЛЬ</a>
+					{% if session.is_admin %}
+					<a href="/admin/tickets" class="pixel-button">ПОДДЕРЖКА (админ)</a>
+					{% endif %}
+					<a href="/logout" class="pixel-button"
+						>ВЫХОД ({{ session.username }})</a
+					>
+					{% else %}
+					<a href="/login" class="pixel-button">ВОЙТИ через Vondic</a>
+					{% endif %}
+				</nav>
+			</header>
+
+			<div class="content-wrapper">{% block content %}{% endblock %}</div>
+
+			<footer class="pixel-footer">
+				<div class="copyright">
+					<p>
+						© 2026 Детский технопарк «Альтаир» РТУ МИРЭА. Все права защищены.
+					</p>
+					<p class="pixel-note">
+						Авторские права принадлежат заказчику. Использование в
+						образовательных целях разрешено.
+					</p>
+				</div>
+			</footer>
+		</div>
+
+		{% block extra_js %}{% endblock %}
+	</body>
+</html>

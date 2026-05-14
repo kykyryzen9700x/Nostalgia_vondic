@@ -1,0 +1,56 @@
+{% extends "base.html" %} {% block content %}
+<div class="register-box" style="max-width: 700px">
+	<h2 style="text-align: center">👤 Профиль</h2>
+	<div class="form-group">
+		<label>Имя пользователя Vondic:</label>
+		<div class="pixel-input" style="background: #fff">{{ user.username }}</div>
+	</div>
+	<div class="form-group">
+		<label>Email:</label>
+		<div class="pixel-input" style="background: #fff">{{ user.email }}</div>
+	</div>
+	<div class="form-group">
+		<label>ID в системе:</label>
+		<div class="pixel-input" style="background: #fff">{{ user.id }}</div>
+	</div>
+
+	<hr style="border: 2px solid #b45f2e; margin: 30px 0" />
+
+	<h3 style="text-align: center">🏆 Лучшие результаты</h3>
+	<div class="records-table" style="padding: 10px">
+		<div class="record-row header-row">
+			<span>Игра</span>
+			<span>Рекорд</span>
+		</div>
+		{% for game, score in best_scores.items() %}
+		<div class="record-row">
+			<span>{{ game|upper }}</span>
+			<span>{{ score }}</span>
+		</div>
+		{% endfor %}
+	</div>
+
+	{% if recent_scores %}
+	<hr style="border: 2px solid #b45f2e; margin: 30px 0" />
+	<h3 style="text-align: center">📊 Последние игры</h3>
+	<div class="records-table" style="padding: 10px">
+		<div class="record-row header-row">
+			<span>Игра</span>
+			<span>Счёт</span>
+			<span>Результат</span>
+		</div>
+		{% for score in recent_scores %}
+		<div class="record-row">
+			<span>{{ score.game_type|upper }}</span>
+			<span>{{ score.score }}</span>
+			<span>{% if score.won %}🏆 Победа{% else %}🎮 Игра{% endif %}</span>
+		</div>
+		{% endfor %}
+	</div>
+	{% endif %}
+
+	<div style="text-align: center; margin-top: 30px">
+		<a href="/" class="pixel-button">🏠 На главную</a>
+	</div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="game-container">
+    <h2>{{ game_name }}</h2>
+    <div id="game-board" style="min-height: 400px; display: flex; justify-content: center;"></div>
+    <div class="score">СЧЁТ: <span id="score">0</span></div>
+    
+    {% if game_type == 'pacman' %}
+    <div class="controls">
+        <button class="control-btn" data-direction="up">▲ ВВЕРХ</button>
+        <button class="control-btn" data-direction="left">◄ ВЛЕВО</button>
+        <button class="control-btn" data-direction="down">▼ ВНИЗ</button>
+        <button class="control-btn" data-direction="right">► ВПРАВО</button>
+        <button class="control-btn" onclick="resetGame()">🔄 НОВАЯ ИГРА</button>
+    </div>
+    <div style="margin-top: 15px; color: #ffcc00; font-size: 10px; text-align: center;">
+        💡 Используй стрелки для смены направления!<br>
+        👻 Пэкман движется автоматически. Избегай привидений!
+    </div>
+    {% elif game_type == 'snake' %}
+    <div class="snake-controls">
+        <button class="snake-control-btn" data-direction="up">▲ ВВЕРХ</button>
+        <button class="snake-control-btn" data-direction="left">◄ ВЛЕВО</button>
+        <button class="snake-control-btn" data-direction="down">▼ ВНИЗ</button>
+        <button class="snake-control-btn" data-direction="right">► ВПРАВО</button>
+        <button class="snake-control-btn" onclick="resetGame()">🔄 НОВАЯ ИГРА</button>
+    </div>
+    <div class="game-tip" style="margin-top: 15px; text-align: center; color: #ffcc00; font-size: 10px;">
+        💡 Используй стрелки для управления змейкой! <br>
+        🔴 Голова - большой светящийся круг (меняет цвет от направления)<br>
+        🟩 Тело - квадраты<br>
+        🍎 Съедай яблоки и не врезайся в себя!
+    </div>
+    {% elif game_type == 'minesweeper' %}
+    <div class="controls">
+        <button class="control-btn" onclick="resetGame()">🔄 НОВАЯ ИГРА</button>
+        <button class="control-btn" onclick="toggleFlagMode()">🚩 РЕЖИМ ФЛАГА: <span id="flagModeText">ВЫКЛ</span></button>
+    </div>
+    <div style="margin-top: 10px; font-size: 10px; color: #fff;">
+        💡 Клик - открыть клетку | ПКМ/Длинное нажатие - поставить/убрать флаг
+    </div>
+    {% endif %}
+    
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="/" class="pixel-button">← НА ГЛАВНУЮ</a>
+    </div>
+</div>
+
+<script>
+    window.GAME_TYPE = '{{ game_type }}';
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/game.js') }}"></script>
+{% endblock %}
