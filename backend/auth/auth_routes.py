@@ -22,8 +22,6 @@ def register():
             session['user_id'] = user_id
             user_info = UserManager.get_user_info(user_id)
             session['nickname'] = user_info['nickname'] if user_info and user_info['nickname'] else None
-            
-            # Если у пользователя нет ника (автоматический сгенерирован), отправляем на создание
             if not session['nickname'] or session['nickname'].startswith('user_'):
                 return redirect('/set_nickname')
             return redirect('/')
@@ -41,8 +39,6 @@ def login():
         if user:
             session['user_id'] = user['id']
             session['nickname'] = user['nickname']
-            
-            # Проверяем, есть ли у пользователя нормальный ник
             if not user['nickname'] or user['nickname'].startswith('user_'):
                 return redirect('/set_nickname')
             return redirect('/')

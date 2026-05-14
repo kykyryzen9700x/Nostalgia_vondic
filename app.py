@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, redirect, session, url_for
 from backend.config import config
 from backend.database.db_manager import init_db
@@ -76,7 +77,6 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
-# ---------- Главная ----------
 @app.route('/')
 def index():
     try:
@@ -93,7 +93,7 @@ def index():
                          snake_scores=snake_scores,
                          minesweeper_scores=minesweeper_scores)
 
-# ---------- Админка тикетов ----------
+
 @app.route('/admin/tickets')
 @admin_required
 def admin_tickets():
@@ -118,11 +118,7 @@ def admin_ticket_reply(ticket_id):
     reply_text = request.form.get('reply', '').strip()
     if not reply_text:
         return {'error': 'Ответ не может быть пустым'}, 400
-
-    # Сохраняем ответ в БД
     update_ticket_response(ticket_id, reply_text)
-
-    # Отправляем ответ пользователю через бота
     if config.BOT_TOKEN and ticket['vondic_chat_id']:
         try:
             client = PublicAPIClient(base_url=config.BOT_BASE_URL)
@@ -149,22 +145,17 @@ def profile():
     if not user:
         session.clear()
         return redirect(url_for('login'))
-
-    # Получаем лучшие результаты по каждой игре
     games = ['pacman', 'snake', 'minesweeper', 'flappy', '2048', 'tetris', 'space_invaders', 'checkers', 'chess']
     best_scores = {}
     for game in games:
         best = ScoreManager.get_best_score(session['user_id'], game)
         best_scores[game] = best if best else 0
-
-    # Последние игры
     recent_scores = ScoreManager.get_user_scores(session['user_id'], limit=10)
-
     return render_template('profile.html',
                          user=user,
                          best_scores=best_scores,
                          recent_scores=recent_scores)
 
-# ---------- Запуск ----------
 if __name__ == '__main__':
-    app.run(host='192.168.3.166', port=8080, debug=True)
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='192.168.3.166', port=8080, debug=config.DEBUG)

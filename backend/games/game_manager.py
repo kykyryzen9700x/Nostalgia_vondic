@@ -42,7 +42,6 @@ class GameManager:
         return self._active_games[game_id]
     
     def create_lobby(self, game_type: str, host_user_id: str, host_nickname: str):
-        """создание лобби"""
         if game_type not in self.MULTIPLAYER_GAMES:
             raise ValueError(f"Game {game_type} is not multiplayer")
         lobby_id = str(uuid.uuid4())[:8].upper()
@@ -61,14 +60,12 @@ class GameManager:
                 'black': None
             }
         }
-        # сохраняем в активных играх для хоста
         game_id = f"{game_type}_{host_user_id}"
         self._active_games[game_id] = game
         print(f"[GameManager] Created lobby: {lobby_id} for {game_type}")
         return lobby_id
     
     def join_lobby(self, lobby_id: str, user_id: str, nickname: str):
-        """подключиться к лобби"""
         if lobby_id not in self._lobbies:
             return False, "Лобби не найдено"
         lobby = self._lobbies[lobby_id]
@@ -77,14 +74,12 @@ class GameManager:
         lobby['guest_user_id'] = user_id
         lobby['guest_nickname'] = nickname
         lobby['players']['black'] = user_id
-        # сохранять игру для гостя
         game_id = f"{lobby['game_type']}_{user_id}"
         self._active_games[game_id] = lobby['game']
         print(f"[GameManager] User {nickname} joined lobby: {lobby_id}")
         return True, "Подключение успешно"
     
     def get_lobby_info(self, lobby_id: str):
-        """получить данные о лобби"""
         if lobby_id not in self._lobbies:
             return None
         lobby = self._lobbies[lobby_id]
@@ -98,12 +93,9 @@ class GameManager:
         }
     
     def get_player_game(self, game_type: str, user_id: str):
-        """Получить игру игрока"""
         game_id = f"{game_type}_{user_id}"
-        # проверяем активные игры
         if game_id in self._active_games:
             return self._active_games[game_id]
-        # проверяем лобби сколько там игроков
         for lobby_id, lobby in self._lobbies.items():
             if lobby['game_type'] == game_type:
                 if lobby['host_user_id'] == user_id or lobby['guest_user_id'] == user_id:
@@ -112,11 +104,9 @@ class GameManager:
         return None
     
     def make_move(self, game_type: str, user_id: str, from_pos: tuple, to_pos: tuple):
-        """сделать ход в онлайне"""
         game = self.get_player_game(game_type, user_id)
         if not game:
             return False, "Игра не найдена"
-        # поиск лобби
         lobby = None
         for l_id, l in self._lobbies.items():
             if l['game_type'] == game_type and l['game'] == game:
@@ -124,30 +114,24 @@ class GameManager:
                 break
         if not lobby:
             return False, "Лобби не найдено"
-        # даём игрокам тест
         if lobby['host_user_id'] == user_id:
             player_color = 'white'
         else:
             player_color = 'black'
-        # проверка чей ход
         if lobby['current_turn'] != player_color:
             return False, "Сейчас не ваш ход"
-        # сделать ход
         success, message = game.make_move(from_pos, to_pos, player_color)
         if success:
-            # передача хода
             lobby['current_turn'] = 'black' if lobby['current_turn'] == 'white' else 'white'
         return success, message
     
     def remove_game(self, game_type: str, user_id: str):
-        """удалить игру из кэша"""
         game_id = f"{game_type}_{user_id}"
         if game_id in self._active_games:
             del self._active_games[game_id]
             print(f"[GameManager] Removed game: {game_id}")
     
     def save_score_if_game_over(self, game_type: str, user_id: str, nickname: str, game):
-        """cохранить результат если игра закончилась"""
         if game.game_over and hasattr(game, 'score'):
             won = getattr(game, 'won', False)
             try:
@@ -161,7 +145,6 @@ class GameManager:
     
     @staticmethod
     def get_game_state(game):
-        """проверяем состояние для отправки пакетов"""
         try:
             state = {
                 'map_html': game.get_map_html(),
@@ -169,7 +152,6 @@ class GameManager:
                 'game_over': game.game_over,
                 'won': getattr(game, 'won', False)
             }
-            # для мультиплеерных игр добавляем дополнительную информацию
             if hasattr(game, 'get_board_state'):
                 state['board_state'] = game.get_board_state()
             return state
@@ -183,6 +165,5 @@ class GameManager:
             }
     
     def reset_game(self, game_type: str, user_id: str):
-        """сброс игры"""
         self.remove_game(game_type, user_id)
         return self.get_or_create_game(game_type, user_id)

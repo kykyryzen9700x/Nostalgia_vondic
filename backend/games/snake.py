@@ -6,7 +6,6 @@ class SnakeGame:
     
     def reset(self):
         self.size = 20
-        # Змейка начинается с 3 клеток
         self.snake = [(10, 10), (9, 10), (8, 10)]
         self.direction = 'right'
         self.next_direction = 'right'
@@ -23,14 +22,9 @@ class SnakeGame:
                 return food
     
     def move(self, direction=None):
-        """Движение змейки - вызывается каждый тик"""
         if self.game_over:
             return
-        
-        # Обновляем направление
         self.direction = self.next_direction
-        
-        # Вычисляем новую голову
         head = self.snake[0]
         if self.direction == 'right':
             new_head = (head[0] + 1, head[1])
@@ -42,48 +36,34 @@ class SnakeGame:
             new_head = (head[0], head[1] + 1)
         else:
             return
-        
-        # Проверка столкновения со стенами
         if new_head[0] < 0 or new_head[0] >= self.size or new_head[1] < 0 or new_head[1] >= self.size:
             self.game_over = True
             return
-        
-        # Проверка столкновения с собой (исключая хвост, который удалится)
         if new_head in self.snake[:-1]:
             self.game_over = True
             return
-        
-        # Добавляем новую голову
         self.snake.insert(0, new_head)
-        
-        # Проверка на еду
         if new_head == self.food:
             self.score += 10
             self.food = self.random_food()
-            # Проверка победы (заполнено всё поле)
             if len(self.snake) == self.size * self.size:
                 self.game_over = True
                 self.won = True
         else:
-            # Удаляем хвост, если не съели еду
             self.snake.pop()
     
     def change_direction(self, direction):
-        """Изменение направления (вызывается при нажатии клавиш)"""
         opposite = {'right': 'left', 'left': 'right', 'up': 'down', 'down': 'up'}
-        # Нельзя развернуться на 180 градусов
         if direction in opposite and direction != opposite.get(self.direction):
             self.next_direction = direction
     
     def get_map_html(self):
-        """Генерация HTML для отображения поля: голова - большой круг, тело - квадраты"""
         html = '''<div class="snake-game-wrapper" style="display: inline-block; background: #0a0a1a; padding: 8px; border-radius: 15px; border: 3px solid #ffcc00; box-shadow: 0 0 15px rgba(255, 204, 0, 0.3);">
                         <div class="game-board snake-board" style="display: inline-block; background: #0a0a1a;">'''
         
         for i in range(self.size):
             html += '<div class="game-row snake-row" style="display: flex; margin: 0; padding: 0; line-height: 1;">'
             for j in range(self.size):
-                # Уменьшенные пробелы между клетками
                 cell_style = 'width: 28px; height: 28px; text-align: center; line-height: 28px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 0.05s ease;'
                 
                 if (j, i) == self.food:

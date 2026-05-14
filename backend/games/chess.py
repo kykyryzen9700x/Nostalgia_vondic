@@ -11,11 +11,9 @@ class ChessGame:
         self.won = False
         self.score = 0
         self.current_turn = 'white'
-        #создать фигуры
         self._setup_board()
     
     def _setup_board(self):
-        #раставление
         #пешки
         for i in range(self.size):
             self.board[1][i] = {'type': 'pawn', 'color': 'black'}

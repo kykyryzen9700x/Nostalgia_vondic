@@ -12,10 +12,11 @@ class FlappyBirdGame:
         self.bird_y = self.height // 2
         self.velocity = 0
         self.gravity = 0.5
-        self.jump_power = -3
+        self.jump_power = -2
         self.pipe_width = 3
         self.pipe_gap = 5
         self.pipe_spacing = 10
+        self.pipe_speed = 1
         self.pipes = []
         self.score = 0
         self.frame_counter = 0
@@ -41,7 +42,8 @@ class FlappyBirdGame:
             return
         
         for pipe in self.pipes[:]:
-            pipe['x'] -= 1
+            pipe['x'] -= self.pipe_speed
+            
             if (pipe['x'] <= self.bird_x + 1 <= pipe['x'] + self.pipe_width):
                 if (self.bird_y < pipe['gap_y'] or 
                     self.bird_y > pipe['gap_y'] + self.pipe_gap):
@@ -50,6 +52,7 @@ class FlappyBirdGame:
             if pipe['x'] + self.pipe_width < 0:
                 self.pipes.remove(pipe)
                 self.score += 10
+        
         self.frame_counter += 1
         if (self.frame_counter >= self.pipe_spacing and 
             (not self.pipes or self.pipes[-1]['x'] < self.width - self.pipe_spacing)):
@@ -74,13 +77,13 @@ class FlappyBirdGame:
                 if x == self.bird_x and y == int(self.bird_y):
                     content = '🐦'
                 elif any(pipe['x'] <= x <= pipe['x'] + self.pipe_width for pipe in self.pipes):
-                    pipe = next(p for p in self.pipes if p['x'] <= x <= p['x'] + self.pipe_width)
-                    if y < pipe['gap_y'] or y > pipe['gap_y'] + self.pipe_gap:
+                    pipe = next((p for p in self.pipes if p['x'] <= x <= p['x'] + self.pipe_width), None)
+                    if pipe and (y < pipe['gap_y'] or y > pipe['gap_y'] + self.pipe_gap):
                         content = '🟩'
                     else:
-                        content = '⬜'
+                        content = '⬛'
                 else:
-                    content = '⬜' if (x + y) % 2 == 0 else '◻️'
+                    content = '⬛' if (x + y) % 2 == 0 else '⬛'
                 
                 html += f'<div class="game-cell" style="width: 35px; height: 35px; text-align: center; font-size: 22px; line-height: 35px;">{content}</div>'
             html += '</div>'

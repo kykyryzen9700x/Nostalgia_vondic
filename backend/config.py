@@ -1,5 +1,9 @@
 import os
 import secrets
+from dotenv import load_dotenv
+
+# Загружаем переменные из .env
+load_dotenv()
 
 
 class Config:
@@ -23,7 +27,11 @@ class Config:
 
     OAUTH_CLIENT_ID = '990cac37-355c-466e-9fa3-b044d56d2191'
     OAUTH_CLIENT_SECRET = 'd51f2425-7a7d-4423-8ff2-bf5a2a6dbabe12cce7b841c54376b62c55a957f7e086'
-    OAUTH_REDIRECT_URI = 'http://localhost:8080/oauth/callback'
+    
+    # ⚠️ ВАЖНО: Замените ВАШ_АДРЕС на ваш реальный адрес в CloudPub
+    # Пример: https://мой-проект.cloudpub.ru/oauth/callback
+    OAUTH_REDIRECT_URI = os.environ.get('OAUTH_REDIRECT_URI', 'https://kykyryzen.cloudpub.ru/oauth/callback')
+    
     OAUTH_AUTHORIZE_URL = 'https://vondic.knopusmedia.ru/oauth/authorize'
     OAUTH_TOKEN_URL = 'https://vondic.knopusmedia.ru/oauth/token'
     OAUTH_USERINFO_URL = 'https://vondic.knopusmedia.ru/oauth/userinfo'

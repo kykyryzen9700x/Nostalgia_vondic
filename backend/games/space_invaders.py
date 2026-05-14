@@ -1,5 +1,6 @@
 import random
 
+
 class SpaceInvadersGame:
     def __init__(self):
         self.reset()
@@ -20,9 +21,8 @@ class SpaceInvadersGame:
         self.enemy_move_down = False
         self.shoot_cooldown = 0
         self.enemy_shoot_cooldown = 0
-        self.frame_counter = 0  # Счётчик кадров для автоматического движения
-        self.move_speed = 10    # Скорость движения врагов (меньше = быстрее)
-        
+        self.frame_counter = 0
+        self.move_speed = 12
         self.create_enemies()
     
     def create_enemies(self):
@@ -37,23 +37,17 @@ class SpaceInvadersGame:
                 })
     
     def update(self):
-        """Автоматическое обновление игры - вызывается каждый тик"""
         if self.game_over:
             return
-        
-        # Движение врагов (автоматически)
         self.move_counter += 1
         if self.move_counter >= self.move_speed:
             self.move_counter = 0
             self.move_enemies()
-        
-        # Движение пуль игрока
         for bullet in self.bullets[:]:
             bullet['y'] -= 1
             if bullet['y'] < 0:
                 self.bullets.remove(bullet)
             else:
-                # Проверка попаданий при движении пули
                 for enemy in self.enemies:
                     if enemy['alive'] and bullet['x'] == enemy['x'] and bullet['y'] == enemy['y']:
                         if bullet in self.bullets:
@@ -61,13 +55,10 @@ class SpaceInvadersGame:
                         enemy['alive'] = False
                         self.score += 10
                         break
-        
-        # Движение вражеских пуль
         for bullet in self.enemy_bullets[:]:
             bullet['y'] += 1
             if bullet['y'] >= self.height:
                 self.enemy_bullets.remove(bullet)
-            # Проверка попадания по игроку
             elif bullet['x'] == self.player_x and bullet['y'] == self.height - 2:
                 if bullet in self.enemy_bullets:
                     self.enemy_bullets.remove(bullet)
@@ -75,8 +66,6 @@ class SpaceInvadersGame:
                 if self.lives <= 0:
                     self.game_over = True
                     self.won = False
-        
-        # Стрельба врагов
         if self.enemy_shoot_cooldown <= 0 and self.enemies:
             alive_enemies = [e for e in self.enemies if e['alive']]
             if alive_enemies:
@@ -85,72 +74,50 @@ class SpaceInvadersGame:
                 self.enemy_shoot_cooldown = random.randint(20, 50)
         else:
             self.enemy_shoot_cooldown -= 1
-        
-        # Уменьшаем задержку стрельбы игрока
         if self.shoot_cooldown > 0:
             self.shoot_cooldown -= 1
-        
-        # Проверка столкновения врагов с игроком
         for enemy in self.enemies:
             if enemy['alive'] and enemy['y'] >= self.height - 2:
                 self.game_over = True
                 self.won = False
                 return
-        
-        # Проверка победы
         alive_count = sum(1 for e in self.enemies if e['alive'])
         if alive_count == 0:
             self.game_over = True
             self.won = True
     
     def move_enemies(self):
-        """Движение всех врагов"""
         if not self.enemies:
             return
-        
-        # Находим границы живых врагов
         alive_enemies = [e for e in self.enemies if e['alive']]
         if not alive_enemies:
             return
-        
         max_x = max(e['x'] for e in alive_enemies)
         min_x = min(e['x'] for e in alive_enemies)
-        
-        # Проверяем нужно ли сменить направление или опуститься
         if self.enemy_direction == 1 and max_x >= self.width - 1:
             self.enemy_direction = -1
             self.enemy_move_down = True
         elif self.enemy_direction == -1 and min_x <= 0:
             self.enemy_direction = 1
             self.enemy_move_down = True
-        
-        # Двигаем всех врагов
         for enemy in self.enemies:
             if enemy['alive']:
                 if self.enemy_move_down:
                     enemy['y'] += 1
                 else:
                     enemy['x'] += self.enemy_direction
-        
         self.enemy_move_down = False
     
     def move(self, direction=None):
-        """Движение игрока (вызывается при нажатии клавиш)"""
         if self.game_over:
             return
-        
-        # Движение игрока
         if direction == 'left' and self.player_x > 0:
             self.player_x -= 1
         elif direction == 'right' and self.player_x < self.width - 1:
             self.player_x += 1
-        
-        # Стрельба игрока
         if direction == 'space' and self.shoot_cooldown == 0:
             self.bullets.append({'x': self.player_x, 'y': self.height - 2})
             self.shoot_cooldown = 15
-        
-        # Обновляем игру
         self.update()
     
     def get_map_html(self):
